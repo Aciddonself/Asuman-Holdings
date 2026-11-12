@@ -51,6 +51,16 @@ export default function Home() {
   const [all, setAll] = useState([]);
   const [state, setState] = useState('loading');
   const [inquiry, setInquiry] = useState({ name: '', email: '', service: '', message: '' });
+  const [reducedMotion, setReducedMotion] = useState(
+    () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
+  );
+
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(preference.matches);
+    preference.addEventListener('change', update);
+    return () => preference.removeEventListener('change', update);
+  }, []);
 
   const setParam = (key, value) => {
     const next = new URLSearchParams(params);
@@ -80,7 +90,7 @@ export default function Home() {
 
   const toListings = (event) => {
     event.preventDefault();
-    document.getElementById('listings')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('listing-results')?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
   };
 
   const sendInquiry = (event) => {
@@ -94,7 +104,8 @@ export default function Home() {
     window.location.assign(waLink(text));
   };
 
-  const heading = drops ? 'Price drops' : category ? CATEGORIES.find((item) => item.key === category)?.label : 'Featured properties';
+  const selectedCategory = CATEGORIES.find((item) => item.key === category);
+  const heading = drops ? 'Price drops' : selectedCategory?.label || 'Featured properties';
 
   return (
     <>
@@ -125,11 +136,11 @@ export default function Home() {
         <div className="tour-stack">
           <div className="tour-card">
             <video
-              autoPlay
+              autoPlay={!reducedMotion}
               muted
-              loop
+              loop={!reducedMotion}
               playsInline
-              preload="metadata"
+              preload={reducedMotion ? 'none' : 'metadata'}
               poster={photos.green}
               aria-label="Property walkthrough by Asuman Holdings"
             >
@@ -208,7 +219,7 @@ export default function Home() {
       <section className="section-panel" id="listings" aria-labelledby="listings-title">
         <div className="section-heading">
           <span className="kick">{items.length} {items.length === 1 ? 'result' : 'results'}</span>
-          <h2 id="listings-title">Curated collections</h2>
+          <h2 id="listings-title">{heading}</h2>
           <p>Real Asuman Holdings properties — apartments and stays ready for your next chapter.</p>
         </div>
 
@@ -255,7 +266,7 @@ export default function Home() {
           </div>
         )}
 
-        <div aria-live="polite">
+        <div id="listing-results" aria-live="polite" aria-atomic="false">
           {state === 'error' && <div className="notice err" style={{ marginTop: 18 }}>Couldn’t load listings. Please make sure the server is running.</div>}
           {state === 'loading' && <div className="empty" style={{ marginTop: 18 }}>Loading listings…</div>}
           {state === 'ready' && items.length === 0 && (

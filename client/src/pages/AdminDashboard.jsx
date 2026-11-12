@@ -13,11 +13,20 @@ export default function AdminDashboard() {
   const [dropping, setDropping] = useState(null);
   const [msg, setMsg] = useState({ type: '', text: '' });
   const [authed, setAuthed] = useState(!!getToken());
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  const load = useCallback(() => {
-    api.admin.list().then(setItems).catch((e) => {
-      if (!getToken()) setAuthed(false); else setMsg({ type: 'err', text: e.message });
-    });
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError('');
+    try {
+      setItems(await api.admin.list());
+    } catch (e) {
+      if (!getToken()) setAuthed(false);
+      else setLoadError(e.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
   useEffect(() => { if (authed) load(); }, [authed, load]);
 
@@ -54,6 +63,7 @@ export default function AdminDashboard() {
         </div>
 
         {msg.text && <div className={`notice ${msg.type}`} role="status" style={{ marginTop: 14 }}>{msg.text}</div>}
+        {loadError && <div className="notice err" role="alert" style={{ marginTop: 14 }}>{loadError}</div>}
 
         <div className="toolbar-row">
           <div className="chips" role="group" aria-label="Filter category">
@@ -69,7 +79,9 @@ export default function AdminDashboard() {
           <table className="tbl">
             <thead><tr><th>Photo</th><th>Listing</th><th>Type</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
-              {rows.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: 28 }}>No listings yet. Add your first one.</td></tr>}
+              {loading && <tr><td colSpan="6" style={{ textAlign: 'center', padding: 28 }}>Loading listings…</td></tr>}
+              {!loading && loadError && <tr><td colSpan="6" style={{ textAlign: 'center', padding: 28 }}>Listings could not be loaded.</td></tr>}
+              {!loading && !loadError && rows.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: 28 }}>{filter ? 'No listings in this category.' : 'No listings yet. Add your first one.'}</td></tr>}
               {rows.map((l) => (
                 <tr key={l.id}>
                   <td>{l.images[0] ? <img className="thumb" src={l.images[0]} alt="" /> : <div className="thumb" />}</td>

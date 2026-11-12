@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Phone, MapPin, MessageCircle, ShieldCheck, LogOut, Menu, X, Mail } from 'lucide-react';
 import { getToken, setToken } from '../api.js';
@@ -7,8 +7,21 @@ import { SITE, waLink } from '../config.js';
 export default function Layout({ children }) {
   const nav = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const toggleRef = useRef(null);
   const loggedIn = !!getToken();
   const closeMenu = () => setMenuOpen(false);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [menuOpen]);
 
   return (
     <>
@@ -24,6 +37,7 @@ export default function Layout({ children }) {
           <button
             type="button"
             className="nav-toggle"
+            ref={toggleRef}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
             aria-controls="primary-nav"

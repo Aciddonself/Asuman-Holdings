@@ -33,7 +33,7 @@ export default function AdminLogin() {
         <div className="field"><label htmlFor="em">Email</label>
           <input id="em" className="input" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
         <div className="field"><label htmlFor="pw">Password</label>
-          <input id="pw" className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+          <input id="pw" className="input" type="password" autoComplete="current-password" maxLength={72} required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
         <button className="btn primary" disabled={busy}><LogIn className="icon" /> {busy ? 'Signing in…' : 'Sign in'}</button>
       </form>
     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, TrendingDown, Undo2 } from 'lucide-react';
 import { api, fmt, percentOff } from '../api.js';
+import { useDialog } from '../hooks/useDialog.js';
 
 export default function PriceDropModal({ listing, onClose, onSaved }) {
   // "From" defaults to the original price if a drop is active, else the current price.
@@ -9,6 +10,7 @@ export default function PriceDropModal({ listing, onClose, onSaved }) {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [hist, setHist] = useState([]);
+  const dialogRef = useDialog(onClose, busy);
 
   useEffect(() => { api.admin.history(listing.id).then(setHist).catch(() => {}); }, [listing.id]);
 
@@ -21,7 +23,7 @@ export default function PriceDropModal({ listing, onClose, onSaved }) {
 
   return (
     <div className="modal-back" role="dialog" aria-modal="true" aria-labelledby="pd-title">
-      <div className="modal" style={{ maxWidth: 520 }}>
+      <div ref={dialogRef} className="modal" style={{ maxWidth: 520 }} tabIndex="-1">
         <div className="modal-head"><span id="pd-title">Drop price</span>
           <button type="button" onClick={onClose} aria-label="Close"><X className="icon" /></button></div>
         <div className="modal-body">
@@ -31,7 +33,7 @@ export default function PriceDropModal({ listing, onClose, onSaved }) {
             <div className="field"><label htmlFor="pf">Drop from ({listing.currency})</label>
               <input id="pf" className="input" type="number" min="0" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
             <div className="field"><label htmlFor="pt">Drop to ({listing.currency})</label>
-              <input id="pt" className="input" type="number" min="0" value={to} onChange={(e) => setTo(e.target.value)} autoFocus /></div>
+              <input id="pt" className="input" type="number" min="0" value={to} onChange={(e) => setTo(e.target.value)} /></div>
           </div>
           {valid && (
             <div className="preview-drop">
@@ -46,7 +48,7 @@ export default function PriceDropModal({ listing, onClose, onSaved }) {
               <ul className="hist">
                 {hist.slice(0, 6).map((h) => (
                   <li key={h.id}><span>{new Date(h.changed_at).toLocaleDateString()} · {h.kind}</span>
-                    <span>{fmt(h.old_price)} → {fmt(h.new_price)}</span></li>
+                    <span>{fmt(h.old_price, listing.currency)} → {fmt(h.new_price, listing.currency)}</span></li>
                 ))}
               </ul>
             </div>

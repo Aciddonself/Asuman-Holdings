@@ -11,7 +11,14 @@ export default function ListingDetail() {
   const [err, setErr] = useState('');
   const [i, setI] = useState(0);
 
-  useEffect(() => { setL(null); setI(0); api.listing(id).then(setL).catch((e) => setErr(e.message)); }, [id]);
+  useEffect(() => {
+    let active = true;
+    setL(null);
+    setErr('');
+    setI(0);
+    api.listing(id).then((listing) => { if (active) setL(listing); }).catch((e) => { if (active) setErr(e.message); });
+    return () => { active = false; };
+  }, [id]);
 
   if (err) return <div className="notice err" style={{ marginTop: 28 }}>{err} <Link to="/">Back to listings</Link></div>;
   if (!l) return <div className="empty" style={{ marginTop: 28 }}>Loading…</div>;

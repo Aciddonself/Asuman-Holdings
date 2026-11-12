@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, ImagePlus, Save } from 'lucide-react';
 import { api, CATEGORIES } from '../api.js';
+import { useDialog } from '../hooks/useDialog.js';
 
 const blank = {
   category: 'land', title: '', description: '', location: '', price: '', price_unit: 'total',
@@ -11,6 +12,7 @@ export default function ListingForm({ listing, onClose, onSaved }) {
   const [f, setF] = useState(listing ? { ...listing, amenities: listing.amenities.join(', '), bedrooms: listing.bedrooms ?? '', bathrooms: listing.bathrooms ?? '', price: Number(listing.price) } : blank);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const dialogRef = useDialog(onClose, busy);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
 
   // Sensible default unit when the category changes (new listings only).
@@ -43,7 +45,7 @@ export default function ListingForm({ listing, onClose, onSaved }) {
 
   return (
     <div className="modal-back" role="dialog" aria-modal="true" aria-labelledby="lf-title">
-      <form className="modal" onSubmit={submit}>
+      <form ref={dialogRef} className="modal" tabIndex="-1" onSubmit={submit}>
         <div className="modal-head"><span id="lf-title">{listing ? 'Edit listing' : 'New listing'}</span>
           <button type="button" onClick={onClose} aria-label="Close"><X className="icon" /></button></div>
         <div className="modal-body">

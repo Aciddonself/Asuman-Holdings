@@ -15,7 +15,9 @@ try {
   const pass = process.env.ADMIN_PASSWORD;
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required. Set it in server/.env.');
   if (!email || !pass) throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD are required. Set them in server/.env.');
+  if (/^replace_with_/i.test(pass)) throw new Error('Replace the example ADMIN_PASSWORD value in server/.env before seeding.');
   if (pass.length < 12) throw new Error('ADMIN_PASSWORD must contain at least 12 characters.');
+  if (Buffer.byteLength(pass, 'utf8') > 72) throw new Error('ADMIN_PASSWORD must be no more than 72 UTF-8 bytes.');
   const hash = await bcrypt.hash(pass, 12);
   await pool.query(
     `INSERT INTO admins (email, password_hash) VALUES ($1,$2)

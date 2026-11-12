@@ -4,9 +4,10 @@ import { Router } from 'express';
 import { query } from './db.js';
 
 export function requireAdmin(req, res, next) {
-  const token = (req.headers.authorization || '').replace(/^Bearer /, '');
+  const token = /^Bearer\s+(\S+)$/i.exec(req.headers.authorization || '')?.[1];
+  if (!token) return res.status(401).json({ error: 'Please sign in as admin.' });
   try {
-    req.admin = jwt.verify(token, process.env.JWT_SECRET);
+    req.admin = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     next();
   } catch {
     res.status(401).json({ error: 'Please sign in as admin.' });
@@ -17,9 +18,14 @@ export const authRouter = Router();
 
 authRouter.post('/login', async (req, res) => {
   const { email = '', password = '' } = req.body || {};
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const passwordValue = String(password);
+  if (normalizedEmail.length > 254 || Buffer.byteLength(passwordValue, 'utf8') > 72) {
+    return res.status(400).json({ error: 'Email or password is too long.' });
+  }
   let rows;
   try {
-    ({ rows } = await query('SELECT * FROM admins WHERE email = $1', [String(email).toLowerCase()]));
+    ({ rows } = await query('SELECT * FROM admins WHERE email = $1', [normalizedEmail]));
   } catch (error) {
     const unavailable = {
       ECONNREFUSED: 'PostgreSQL cannot be reached. Start PostgreSQL and try again.',
@@ -35,10 +41,10 @@ authRouter.post('/login', async (req, res) => {
     throw error;
   }
   const admin = rows[0];
-  if (!admin || !(await bcrypt.compare(String(password), admin.password_hash))) {
+  if (!admin || !(await bcrypt.compare(passwordValue, admin.password_hash))) {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
-  const token = jwt.sign({ id: admin.id, email: admin.email }, process.env.JWT_SECRET, { expiresIn: '8h' });
+  const token = jwt.sign({ id: admin.id, email: admin.email }, process.env.JWT_SECRET, { expiresIn: '8h', algorithm: 'HS256' });
   res.json({ token, email: admin.email });
 });
 
