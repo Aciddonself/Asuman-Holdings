@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MapPin, BedDouble, Bath, Ruler, Map, Building2, Palmtree } from 'lucide-react';
-import { fmt, unitLabel, percentOff, CATEGORIES } from '../api.js';
+import { assetUrl, fmt, unitLabel, percentOff, CATEGORIES } from '../api.js';
 
 export const CatIcon = ({ cat, ...p }) => {
   const C = { land: Map, room: BedDouble, rental: Building2, airbnb: Palmtree }[cat] || Map;
@@ -26,7 +26,7 @@ export default function ListingCard({ l }) {
   return (
     <Link to={`/listing/${l.id}`} className="card">
       <div className="card-img">
-        {l.images[0] ? <img src={l.images[0]} alt={l.title} loading="lazy" /> : <CatIcon cat={l.category} />}
+        {l.images[0] ? <img src={assetUrl(l.images[0])} alt={l.title} loading="lazy" /> : <CatIcon cat={l.category} />}
         <span className="tag"><CatIcon cat={l.category} /> {label}</span>
         {l.original_price && <span className="tag drop">Price drop</span>}
         {l.status === 'taken' && <span className="tag taken">Taken</span>}

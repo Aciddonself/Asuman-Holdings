@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Plus, Pencil, TrendingDown, Trash2, Eye, EyeOff, LayoutDashboard } from 'lucide-react';
-import { api, getToken, CATEGORIES, fmt, unitLabel } from '../api.js';
+import { api, assetUrl, getToken, CATEGORIES, fmt, unitLabel } from '../api.js';
 import ListingForm from '../components/ListingForm.jsx';
 import PriceDropModal from '../components/PriceDropModal.jsx';
 import { CatIcon } from '../components/ListingCard.jsx';
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
               {!loading && !loadError && rows.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: 28 }}>{filter ? 'No listings in this category.' : 'No listings yet. Add your first one.'}</td></tr>}
               {rows.map((l) => (
                 <tr key={l.id}>
-                  <td>{l.images[0] ? <img className="thumb" src={l.images[0]} alt="" /> : <div className="thumb" />}</td>
+                  <td>{l.images[0] ? <img className="thumb" src={assetUrl(l.images[0])} alt="" /> : <div className="thumb" />}</td>
                   <td><strong>{l.title}</strong><br /><span style={{ fontSize: 12, color: 'var(--muted)' }}>{l.location}</span></td>
                   <td><span className="pill gold">{CATEGORIES.find((c) => c.key === l.category)?.label}</span></td>
                   <td>

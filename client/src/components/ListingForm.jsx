@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, ImagePlus, Save } from 'lucide-react';
-import { api, CATEGORIES } from '../api.js';
+import { api, assetUrl, CATEGORIES } from '../api.js';
 import { useDialog } from '../hooks/useDialog.js';
 
 const blank = {
@@ -91,7 +91,7 @@ export default function ListingForm({ listing, onClose, onSaved }) {
             <div className="img-grid">
               {f.images.map((src) => (
                 <div className="img-item" key={src}>
-                  <img src={src} alt="" />
+                  <img src={assetUrl(src)} alt="" />
                   <button type="button" aria-label="Remove photo" onClick={() => setF({ ...f, images: f.images.filter((x) => x !== src) })}><X className="icon" /></button>
                 </div>
               ))}

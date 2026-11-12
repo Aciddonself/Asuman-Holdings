@@ -40,6 +40,7 @@ The API requires `DATABASE_URL` and a `JWT_SECRET` of at least 32 characters. Th
 ## Notes
 
 - Theme colours and fonts are CSS variables at the top of `client/src/styles.css`.
-- Production: `npm run build` in `client`, serve `client/dist` with SPA fallback for routes such as `/listing/:id` and `/admin`, and reverse-proxy `/api` and `/uploads` to the Express server. Set `NODE_ENV=production`, `CLIENT_ORIGIN` to the comma-separated allowed site origins, and use a strong unique `JWT_SECRET` and `ADMIN_PASSWORD`. The API refuses to start in production without `CLIENT_ORIGIN`.
+- Netlify: `netlify.toml` configures the Vite build and SPA fallback. Set the site's `VITE_API_BASE_URL` build environment variable to the deployed API's origin (for example, `https://api.example.com`); do not add a trailing slash. The API must allow the Netlify site origin in `CLIENT_ORIGIN`.
+- Production API: run the Express server on a persistent Node host and connect it to PostgreSQL. Set `NODE_ENV=production`, `CLIENT_ORIGIN` to the comma-separated allowed site origins, and use a strong unique `JWT_SECRET` and `ADMIN_PASSWORD`. The API refuses to start in production without `CLIENT_ORIGIN`.
 - Keep `server/uploads` on persistent storage in production. Deployments with ephemeral filesystems will lose listing photos on restart; use a persistent volume or object storage there.
 - Change the admin password by editing `server/.env` and re-running `npm run seed`.

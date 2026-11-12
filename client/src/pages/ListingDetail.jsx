@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, Ruler, BedDouble, Bath, Phone, MessageCircle, Info } from 'lucide-react';
-import { api, CATEGORIES, percentOff, fmt, unitLabel } from '../api.js';
+import { api, assetUrl, CATEGORIES, percentOff, fmt, unitLabel } from '../api.js';
 import { SITE, waLink } from '../config.js';
 import { CatIcon, Price } from '../components/ListingCard.jsx';
 
@@ -40,12 +40,12 @@ export default function ListingDetail() {
       <div className="detail">
         <div>
           <div className="gallery-main">
-            {l.images[i] ? <img src={l.images[i]} alt={`${l.title} — photo ${i + 1}`} /> : <CatIcon cat={l.category} style={{ width: 64, height: 64 }} />}
+            {l.images[i] ? <img src={assetUrl(l.images[i])} alt={`${l.title} — photo ${i + 1}`} /> : <CatIcon cat={l.category} style={{ width: 64, height: 64 }} />}
           </div>
           {l.images.length > 1 && (
             <div className="thumbs">
               {l.images.map((src, n) => (
-                <button key={src} aria-label={`Show photo ${n + 1}`} aria-current={n === i} onClick={() => setI(n)}><img src={src} alt="" /></button>
+                <button key={src} aria-label={`Show photo ${n + 1}`} aria-current={n === i} onClick={() => setI(n)}><img src={assetUrl(src)} alt="" /></button>
               ))}
             </div>
           )}

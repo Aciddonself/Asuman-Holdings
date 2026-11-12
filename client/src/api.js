@@ -1,4 +1,10 @@
 const TOKEN_KEY = 'de_admin_token';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+
+export const assetUrl = (path) => {
+  if (!path || /^(https?:|data:|blob:)/i.test(path)) return path;
+  return `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (t) => (t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY));
@@ -8,7 +14,7 @@ async function request(path, { method = 'GET', body, form } = {}) {
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body) headers['Content-Type'] = 'application/json';
-  const res = await fetch(path, { method, headers, body: form || (body ? JSON.stringify(body) : undefined) });
+  const res = await fetch(`${API_BASE_URL}${path}`, { method, headers, body: form || (body ? JSON.stringify(body) : undefined) });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401 && token) setToken(null);
