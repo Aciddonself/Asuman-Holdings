@@ -1,5 +1,6 @@
 const TOKEN_KEY = 'de_admin_token';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
 
 export const assetUrl = (path) => {
   if (!path || /^(https?:|data:|blob:)/i.test(path)) return path;
@@ -11,6 +12,7 @@ export const setToken = (t) => (t ? localStorage.setItem(TOKEN_KEY, t) : localSt
 
 async function request(path, { method = 'GET', body, form } = {}) {
   const headers = {};
+  if (SUPABASE_PUBLISHABLE_KEY) headers.apikey = SUPABASE_PUBLISHABLE_KEY;
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body) headers['Content-Type'] = 'application/json';
@@ -41,9 +43,16 @@ export const api = {
     restorePrice: (id) => request(`/api/admin/listings/${id}/restore-price`, { method: 'POST' }),
     history: (id) => request(`/api/admin/listings/${id}/history`),
     upload: (files) => {
-      const form = new FormData();
-      [...files].forEach((f) => form.append('images', f));
-      return request('/api/admin/listings/upload', { method: 'POST', form });
+      return (async () => {
+        const urls = [];
+        for (const file of files) {
+          const form = new FormData();
+          form.append('images', file);
+          const { urls: uploaded } = await request('/api/admin/listings/upload', { method: 'POST', form });
+          urls.push(...uploaded);
+        }
+        return { urls };
+      })();
     },
   },
 };

@@ -43,6 +43,18 @@ if (process.env.JWT_SECRET && /^replace_with_/i.test(process.env.JWT_SECRET)) {
 if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
   missingConfig.push('JWT_SECRET (must be at least 32 characters)');
 }
+if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+  try {
+    if (['localhost', '127.0.0.1', '::1'].includes(new URL(process.env.DATABASE_URL).hostname)) {
+      missingConfig.push('DATABASE_URL (must point to a hosted PostgreSQL database in production)');
+    }
+  } catch {
+    missingConfig.push('DATABASE_URL (must be a valid PostgreSQL connection URL)');
+  }
+}
+if (process.env.NODE_ENV === 'production' && (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY)) {
+  missingConfig.push('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (required for persistent image uploads)');
+}
 if (process.env.NODE_ENV === 'production' && !allowedOrigins.length) {
   missingConfig.push('CLIENT_ORIGIN (required in production)');
 }

@@ -1,6 +1,6 @@
 # Asuman Holdings — Your Dreamland Stream
 
-Property, land, Airbnb and rentals in Uganda. React (Vite) + Express + PostgreSQL.
+Property, land, Airbnb and rentals in Uganda. React (Vite) + Supabase Edge Functions + Supabase PostgreSQL and Storage.
 
 Use Node.js 22.12 or newer and npm 10 or newer for both applications.
 
@@ -8,8 +8,8 @@ Public site: Asuman Holdings' navy, gold, and warm-neutral brand, property-story
 
 ## Setup
 
-1. Create the database: `createdb asuman_holdings` (or create a PostgreSQL database named `asuman_holdings` with your database tool).
-2. Backend
+1. For local development, create a PostgreSQL database: `createdb asuman_holdings` (or create it with your database tool).
+2. Local API
    ```
    cd server
    # Copy .env.example to .env, then set DATABASE_URL, JWT_SECRET, ADMIN_EMAIL, and ADMIN_PASSWORD.
@@ -20,7 +20,7 @@ Public site: Asuman Holdings' navy, gold, and warm-neutral brand, property-story
    npm run seed             # creates the admin + 5 sample listings (delete the samples from the dashboard)
    npm run dev              # http://localhost:5000
    ```
-3. Frontend
+3. Frontend (local API)
    ```
    cd client
    npm ci
@@ -33,14 +33,15 @@ The API requires `DATABASE_URL` and a `JWT_SECRET` of at least 32 characters. Th
 ## What the admin can do
 
 - Add, edit, delete lands, rooms, rentals and Airbnb listings (price, per month / per night / one-off, size, beds, baths, amenities, description).
-- Upload photos (JPG/PNG/WEBP/GIF, up to 8 MB each) — stored in `server/uploads`.
+- Upload photos (JPG/PNG/WEBP/GIF, up to 8 MB each) — stored in Supabase Storage in production and `server/uploads` locally.
 - Mark a listing taken/available (taken listings are hidden from the public site).
 - **Drop a price from X to Y**: "Price" button → enter the old and new amounts. The public site shows the new price, the old price crossed out and a `-%` badge. "Restore" brings the original price back. Editing the price manually ends a drop. Every change is logged in `price_history`.
 
 ## Notes
 
 - Theme colours and fonts are CSS variables at the top of `client/src/styles.css`.
-- Netlify: `netlify.toml` configures the Vite build and SPA fallback. Set the site's `VITE_API_BASE_URL` build environment variable to the deployed API's origin (for example, `https://api.example.com`); do not add a trailing slash. The API must allow the Netlify site origin in `CLIENT_ORIGIN`.
-- Production API: run the Express server on a persistent Node host and connect it to PostgreSQL. Set `NODE_ENV=production`, `CLIENT_ORIGIN` to the comma-separated allowed site origins, and use a strong unique `JWT_SECRET` and `ADMIN_PASSWORD`. The API refuses to start in production without `CLIENT_ORIGIN`.
-- Keep `server/uploads` on persistent storage in production. Deployments with ephemeral filesystems will lose listing photos on restart; use a persistent volume or object storage there.
-- Change the admin password by editing `server/.env` and re-running `npm run seed`.
+- Netlify: `netlify.toml` configures the Vite build and SPA fallback. Set `VITE_API_BASE_URL` to `https://<project-ref>.supabase.co/functions/v1` and `VITE_SUPABASE_PUBLISHABLE_KEY` to the project's publishable key.
+- Supabase: the Edge API is `supabase/functions/api`; `supabase/config.toml` disables gateway JWT validation for this function because it validates the app's admin JWT itself. Set Edge Function secrets `ADMIN_JWT_SECRET` (unique random string of at least 32 characters) and `CLIENT_ORIGIN` (the exact Netlify origin, plus localhost only for local browser development). Supabase injects the server-only key used by the function; never put a secret/service-role key in Netlify or client code.
+- Supabase setup: link the Supabase CLI to the selected project, then run `npx supabase db push --remote`, `npx supabase seed buckets --remote`, and `npx supabase functions deploy api --project-ref <project-ref> --no-verify-jwt`. Create the admin account with `npm run seed` from `server` using that project's PostgreSQL connection string in `server/.env`; sample listings are added only when there are no listings. Keep database passwords out of Git.
+- The `property-images` bucket is public so published listing photos can load on the public site; uploads and deletes still go through the authenticated Edge Function. The free Supabase plan includes 500 MB database and 1 GB storage, and can pause projects after a week of inactivity.
+- Change the admin password by editing `server/.env` and re-running `npm run seed` against the same database.

@@ -2,14 +2,22 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { pool, query } from './db.js';
 import { requireAdmin } from './auth.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-export const uploadDir = path.join(here, '..', 'uploads');
+export const uploadDir = process.env.UPLOAD_TMP_DIR || (process.env.NODE_ENV === 'production'
+  ? path.join(os.tmpdir(), 'asuman-holdings-uploads')
+  : path.join(here, '..', 'uploads'));
 fs.mkdirSync(uploadDir, { recursive: true });
+
+const storageBaseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, '');
+const storageServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const storageBucket = process.env.SUPABASE_STORAGE_BUCKET || 'property-images';
+const hasSupabaseStorage = Boolean(storageBaseUrl && storageServiceKey);
 
 const imageTypes = {
   'image/jpeg': { extension: '.jpg', matches: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
@@ -34,6 +42,47 @@ async function isValidImage(file) {
 
 async function removeUploaded(files) {
   await Promise.all(files.map((file) => fs.promises.unlink(file.path).catch(() => {})));
+}
+
+async function uploadToSupabase(file) {
+  const objectPath = file.filename;
+  let response;
+  try {
+    response = await fetch(
+      `${storageBaseUrl}/storage/v1/object/${encodeURIComponent(storageBucket)}/${encodeURIComponent(objectPath)}`,
+      {
+        method: 'POST',
+        headers: {
+          apikey: storageServiceKey,
+          Authorization: `Bearer ${storageServiceKey}`,
+          'Content-Type': file.mimetype,
+          'Cache-Control': '31536000',
+          'x-upsert': 'false',
+        },
+        body: await fs.promises.readFile(file.path),
+      }
+    );
+  } catch {
+    throw new Error('Supabase Storage upload failed because the service could not be reached.');
+  }
+  if (!response.ok) throw new Error(`Supabase Storage rejected an image upload (HTTP ${response.status}). Check the bucket and storage configuration.`);
+  return `${storageBaseUrl}/storage/v1/object/public/${encodeURIComponent(storageBucket)}/${encodeURIComponent(objectPath)}`;
+}
+
+async function removeStoredImage(image) {
+  if (hasSupabaseStorage && image.startsWith(`${storageBaseUrl}/storage/v1/object/public/${encodeURIComponent(storageBucket)}/`)) {
+    const objectPath = image.slice(`${storageBaseUrl}/storage/v1/object/public/${encodeURIComponent(storageBucket)}/`.length);
+    const response = await fetch(
+      `${storageBaseUrl}/storage/v1/object/${encodeURIComponent(storageBucket)}/${objectPath}`,
+      { method: 'DELETE', headers: { apikey: storageServiceKey, Authorization: `Bearer ${storageServiceKey}` } }
+    );
+    if (!response.ok) throw new Error(`Supabase Storage could not delete an image (HTTP ${response.status}).`);
+    return;
+  }
+
+  if (image.startsWith('/uploads/')) {
+    await fs.promises.unlink(path.join(uploadDir, path.basename(image))).catch(() => {});
+  }
 }
 
 const upload = multer({
@@ -269,8 +318,7 @@ adminRouter.delete('/:id(\\d+)', async (req, res) => {
   const { rows } = await query('DELETE FROM listings WHERE id = $1 RETURNING images', [req.params.id]);
   if (!rows[0]) return res.status(404).json({ error: 'Listing not found.' });
   for (const url of rows[0].images) {
-    const file = path.join(uploadDir, path.basename(url));
-    fs.promises.unlink(file).catch(() => {});
+    removeStoredImage(url).catch((error) => console.error('Unable to remove listing image:', error.message));
   }
   res.json({ ok: true });
 });
@@ -283,14 +331,21 @@ adminRouter.post('/upload', (req, res) => {
       await removeUploaded(files);
       return res.status(400).json({ error: err.message });
     }
+    const storedUrls = [];
     try {
       for (const file of files) {
         if (!await isValidImage(file)) throw new Error('An uploaded file is not a valid JPG, PNG, WEBP or GIF image.');
       }
-      res.json({ urls: files.map((f) => `/uploads/${f.filename}`) });
+      if (hasSupabaseStorage) {
+        for (const file of files) storedUrls.push(await uploadToSupabase(file));
+      }
+      res.json({ urls: hasSupabaseStorage ? storedUrls : files.map((file) => `/uploads/${file.filename}`) });
     } catch (error) {
+      await Promise.all(storedUrls.map((url) => removeStoredImage(url).catch(() => {})));
       await removeUploaded(files);
-      res.status(400).json({ error: error.message });
+      res.status(error.message.startsWith('Supabase Storage') ? 502 : 400).json({ error: error.message });
+      return;
     }
+    await removeUploaded(files);
   });
 });
