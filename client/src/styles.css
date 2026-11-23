@@ -1,4 +1,4 @@
-/* Asuman Holdings — trust navy, warm sand, and gold */
+/* Asuman Holdings: trust navy, warm sand, and gold */
 *,*::before,*::after{box-sizing:border-box}
 :root{
   --g9:#0F2A4A; --g8:#173A61; --g7:#2E5883; --g6:#4D789F; --g1:#E5ECF3; --g0:#F4F6F8;
@@ -380,6 +380,7 @@ table.tbl{width:100%;border-collapse:collapse;min-width:860px}
 .inquiry-form .field.full{grid-column:1/-1}
 .inquiry-form .btn{grid-column:1/-1;justify-self:start}
 .fab-actions{position:fixed;right:22px;bottom:20px;z-index:50;display:flex;gap:10px}
+iframe#nl-badge-frame{display:none!important}
 .fab{position:static;width:auto;height:52px;padding:0 18px;border:3px solid rgba(255,255,255,.88);border-radius:18px;font-size:15px;font-weight:800;box-shadow:0 9px 23px rgba(15,42,74,.22)}
 .fab .icon{width:20px;height:20px}
 .fab-call{background:var(--g9);color:#fff}

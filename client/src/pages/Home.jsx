@@ -19,14 +19,14 @@ const values = [
 
 const services = [
   { icon: Building2, title: 'Airbnb Rentals', image: photos.beige, text: 'Host-ready stays with listing optimization, guest care, cleaning coordination, and dynamic pricing.' },
-  { icon: MapPin, title: 'Land Sales', image: photos.green, text: 'Verified plots in promising locations — guided due diligence so your investment stands on solid ground.' },
+  { icon: MapPin, title: 'Land Sales', image: photos.green, text: 'Verified plots in promising locations, with guidance through due diligence.' },
   { icon: Building2, title: 'Apartment Management', image: photos.grey, text: 'Tenant relations, maintenance, and rent collection handled so ownership stays stress-free.' },
   { icon: Compass, title: 'Property Consulting', image: photos.beige, text: 'Strategy for buying, renting, or scaling a portfolio with local insight and clear next steps.' },
 ];
 
 const testimonials = [
   { quote: 'Asuman Holdings turned my apartment into a reliable short-stay income stream. Communication is clear and guests love the space.', name: 'Sarah Namukasa', role: 'Homeowner · Airbnb host' },
-  { quote: 'The land process felt transparent from day one. I always knew the next step — rare in property deals.', name: 'Marcus Okello', role: 'Land investor' },
+  { quote: 'The land process felt transparent from day one. I always knew the next step. That was rare in property deals.', name: 'Marcus Okello', role: 'Land investor' },
   { quote: 'Living in a managed Asuman property has been smooth. Maintenance is quick and the compound feels secure.', name: 'Elena Atim', role: 'Long-term tenant' },
 ];
 
@@ -119,7 +119,7 @@ export default function Home() {
           </div>
           <h1 id="home-title">Find your dream property,<br /><em>land, AirBnB and/or rental</em></h1>
           <p className="hero-lead">
-            Asuman Holdings brings elegance and trust to property in {SITE.country} — luxury apartments,
+            Asuman Holdings brings elegance and trusted property services to {SITE.country}, including luxury apartments,
             prime land, Airbnb stays, and full-service management under one roof.
           </p>
           <div className="hero-actions">
@@ -173,7 +173,7 @@ export default function Home() {
             <span className="kick">Our story</span>
             <h2 id="about-title">Property management with heart and polish</h2>
             <p>
-              Asuman Holdings was built so finding a home, land, or investment feels inspiring — not overwhelming.
+              Asuman Holdings was built to make finding a home, land, or investment inspiring and straightforward.
               We blend careful curation with hands-on management so every listing earns its place in your dream journey.
             </p>
             <p>
@@ -201,7 +201,7 @@ export default function Home() {
         <div className="section-heading">
           <span className="kick">What we do</span>
           <h2 id="services-title">Tailored property solutions</h2>
-          <p>One team for stays, land, apartments, and long-term care — designed around how you want to live and invest.</p>
+          <p>One team for stays, land, apartments, and long-term care, shaped around how you want to live and invest.</p>
         </div>
         <div className="service-grid">
           {services.map(({ icon: Icon, title, image, text }) => (
@@ -222,7 +222,7 @@ export default function Home() {
         <div className="section-heading">
           <span className="kick">{items.length} {items.length === 1 ? 'result' : 'results'}</span>
           <h2 id="listings-title">{heading}</h2>
-          <p>Real Asuman Holdings properties — apartments and stays ready for your next chapter.</p>
+          <p>Explore Asuman Holdings properties, from apartments to stays for your next chapter.</p>
         </div>
 
         <form className="listing-search" onSubmit={toListings} role="search">
@@ -284,7 +284,7 @@ export default function Home() {
         <div className="section-heading">
           <span className="kick"><Camera className="icon" /> Gallery & tours</span>
           <h2 id="gallery-title">Step inside the portfolio</h2>
-          <p>Photos from our properties plus immersive video tours — see the spaces before you visit.</p>
+          <p>Browse property photos and video tours to preview each space before you visit.</p>
         </div>
         <div className="gallery-grid">
           <article className="gallery-card">
@@ -347,7 +347,7 @@ export default function Home() {
           <div className="contact-copy">
             <span className="kick">Get in touch</span>
             <h2 id="contact-title">Start your dream property journey</h2>
-            <p>Call us directly or open a WhatsApp chat — we respond quickly on land, Airbnb, rentals, and management.</p>
+            <p>Call us directly or start a WhatsApp chat. We respond quickly to questions about land, Airbnb, rentals, and management.</p>
             <div className="contact-list">
               <a href={`tel:${SITE.phoneTel}`}><span className="contact-icon"><Phone className="icon" /></span><span><small>Direct call</small><br />{SITE.phoneDisplay}</span></a>
               <a href={waLink()} target="_blank" rel="noreferrer"><span className="contact-icon"><MessageCircle className="icon" /></span><span><small>WhatsApp chat</small><br />Message {SITE.phoneDisplay}</span></a>

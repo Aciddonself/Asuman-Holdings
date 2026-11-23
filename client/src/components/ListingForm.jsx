@@ -102,7 +102,7 @@ export default function ListingForm({ listing, onClose, onSaved }) {
             <input id="im" type="file" accept="image/*" multiple hidden onChange={upload} />
           </div>
           <label className="check"><input type="checkbox" checked={f.featured} onChange={set('featured')} /> Feature this listing on top</label>
-          {listing && listing.original_price && <p className="notice ok" style={{ margin: 0 }}>A price drop is active. Changing the price here ends it — use “Drop price” to adjust it instead.</p>}
+          {listing && listing.original_price && <p className="notice ok" style={{ margin: 0 }}>A price drop is active. Changing the price here ends it. Use “Drop price” to adjust it.</p>}
         </div>
         <div className="modal-foot">
           <button type="button" className="btn ghost" onClick={onClose}>Cancel</button>

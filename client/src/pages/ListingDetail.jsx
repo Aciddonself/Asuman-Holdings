@@ -28,7 +28,7 @@ export default function ListingDetail() {
     ? `Hello Asuman Holdings, I saw that "${l.title}" (#${l.id}) is taken. Please help me find a similar property.`
     : l.status === 'coming_soon'
       ? `Hello Asuman Holdings, I'm interested in "${l.title}" (#${l.id}) and would like to know when it will be available.`
-      : `Hello Asuman Holdings, I'm interested in "${l.title}" (#${l.id}) — ${fmt(l.price, l.currency)} ${unitLabel(l.price_unit)}.`;
+      : `Hello Asuman Holdings, I'm interested in "${l.title}" (#${l.id}), priced at ${fmt(l.price, l.currency)} ${unitLabel(l.price_unit)}.`;
   const contactLabel = l.status === 'taken' ? 'Find a similar property' : l.status === 'coming_soon' ? 'Ask about availability' : 'WhatsApp';
 
   return (
@@ -45,7 +45,7 @@ export default function ListingDetail() {
       <div className="detail">
         <div>
           <div className="gallery-main">
-            {l.images[i] ? <img src={assetUrl(l.images[i])} alt={`${l.title} — photo ${i + 1}`} /> : <CatIcon cat={l.category} style={{ width: 64, height: 64 }} />}
+            {l.images[i] ? <img src={assetUrl(l.images[i])} alt={`${l.title}, photo ${i + 1}`} /> : <CatIcon cat={l.category} style={{ width: 64, height: 64 }} />}
           </div>
           {l.images.length > 1 && (
             <div className="thumbs">
