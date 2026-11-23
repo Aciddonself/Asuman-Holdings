@@ -8,12 +8,7 @@ import {
 import { api, CATEGORIES } from '../api.js';
 import { SITE, waLink } from '../config.js';
 import ListingCard, { CatIcon } from '../components/ListingCard.jsx';
-
-const photos = {
-  green: '/images/property-green-courtyard.jpg',
-  grey: '/images/property-grey-facade.jpg',
-  beige: '/images/property-beige-courtyard.jpg',
-};
+import { projectPhotos as photos, projectVideos as videoTours } from '../projectMedia.js';
 
 const values = [
   { icon: ShieldCheck, title: 'Trust & Transparency', text: 'Clear deals, honest guidance, and documented processes on every property transaction.' },
@@ -27,13 +22,6 @@ const services = [
   { icon: MapPin, title: 'Land Sales', image: photos.green, text: 'Verified plots in promising locations — guided due diligence so your investment stands on solid ground.' },
   { icon: Building2, title: 'Apartment Management', image: photos.grey, text: 'Tenant relations, maintenance, and rent collection handled so ownership stays stress-free.' },
   { icon: Compass, title: 'Property Consulting', image: photos.beige, text: 'Strategy for buying, renting, or scaling a portfolio with local insight and clear next steps.' },
-];
-
-const videoTours = [
-  { title: 'Interior Living Tour', text: 'Step inside a welcoming, light-filled home.', src: 'https://videos.pexels.com/video-files/7578546/7578546-uhd_3840_2160_30fps.mp4', poster: photos.green },
-  { title: 'Home Walkthrough', text: 'Explore a considered modern interior.', src: 'https://videos.pexels.com/video-files/10135086/10135086-uhd_3840_2160_30fps.mp4', poster: photos.beige },
-  { title: 'Lifestyle Spaces', text: 'Take a closer look at the courtyard.', src: 'https://videos.pexels.com/video-files/32638428/13917643_3840_2160_30fps.mp4', poster: photos.green },
-  { title: 'Modern Grey Suites', text: 'See the architecture and surroundings.', src: 'https://videos.pexels.com/video-files/18531410/18531410-uhd_3840_2160_60fps.mp4', poster: photos.grey },
 ];
 
 const testimonials = [

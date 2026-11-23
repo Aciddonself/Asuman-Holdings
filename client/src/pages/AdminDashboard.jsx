@@ -5,6 +5,7 @@ import { api, assetUrl, getToken, CATEGORIES, fmt, unitLabel } from '../api.js';
 import ListingForm from '../components/ListingForm.jsx';
 import PriceDropModal from '../components/PriceDropModal.jsx';
 import { CatIcon } from '../components/ListingCard.jsx';
+import { projectImages, projectVideos } from '../projectMedia.js';
 
 export default function AdminDashboard() {
   const [items, setItems] = useState([]);
@@ -61,6 +62,32 @@ export default function AdminDashboard() {
           <div className="stat dark"><b>{count((l) => l.status === 'taken')}</b><span>Taken</span></div>
           <div className="stat gold"><b>{count((l) => l.original_price)}</b><span>Active price drops</span></div>
         </div>
+
+        <section className="project-media" aria-labelledby="project-media-title">
+          <div className="project-media-heading">
+            <div><span className="kick">Current website assets</span><h3 id="project-media-title">Project images and videos</h3></div>
+            <span className="sec-kicker">{projectImages.length} images · {projectVideos.length} video tours</span>
+          </div>
+          <p className="project-media-copy">These are the images and video tours currently shown on the public website. Listing photos can be added or changed from each listing’s editor.</p>
+          <div className="project-media-grid">
+            {projectImages.map((image) => (
+              <article className="project-media-card" key={image.src}>
+                <img src={image.src} alt={image.title} loading="lazy" />
+                <h4>{image.title}</h4>
+                <span>Project image</span>
+              </article>
+            ))}
+            {projectVideos.map((video) => (
+              <article className="project-media-card" key={video.src}>
+                <video controls playsInline preload="none" poster={video.poster} aria-label={video.title}>
+                  <source src={video.src} type="video/mp4" />
+                </video>
+                <h4>{video.title}</h4>
+                <span>Website video tour</span>
+              </article>
+            ))}
+          </div>
+        </section>
 
         {msg.text && <div className={`notice ${msg.type}`} role="status" style={{ marginTop: 14 }}>{msg.text}</div>}
         {loadError && <div className="notice err" role="alert" style={{ marginTop: 14 }}>{loadError}</div>}
