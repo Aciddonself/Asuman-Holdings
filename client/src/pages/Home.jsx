@@ -50,6 +50,7 @@ export default function Home() {
   const [max, setMax] = useState('');
   const [all, setAll] = useState([]);
   const [state, setState] = useState('loading');
+  const [loadError, setLoadError] = useState('');
   const [inquiry, setInquiry] = useState({ name: '', email: '', service: '', message: '' });
   const [reducedMotion, setReducedMotion] = useState(
     () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false,
@@ -69,7 +70,20 @@ export default function Home() {
   };
 
   useEffect(() => {
-    api.listings().then((data) => { setAll(data); setState('ready'); }).catch(() => setState('error'));
+    let active = true;
+    api.listings()
+      .then((data) => {
+        if (!active) return;
+        setAll(data);
+        setState('ready');
+      })
+      .catch((error) => {
+        if (!active) return;
+        setAll([]);
+        setLoadError(error.message);
+        setState('error');
+      });
+    return () => { active = false; };
   }, []);
 
   const counts = useMemo(
@@ -267,7 +281,7 @@ export default function Home() {
         )}
 
         <div id="listing-results" aria-live="polite" aria-atomic="false">
-          {state === 'error' && <div className="notice err" style={{ marginTop: 18 }}>Couldn’t load listings. Please make sure the server is running.</div>}
+          {state === 'error' && <div className="notice err" role="alert" style={{ marginTop: 18 }}>Couldn’t load listings. {loadError}</div>}
           {state === 'loading' && <div className="empty" style={{ marginTop: 18 }}>Loading listings…</div>}
           {state === 'ready' && items.length === 0 && (
             <div className="empty" style={{ marginTop: 18 }}>
