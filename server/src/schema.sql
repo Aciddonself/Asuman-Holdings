@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS listings (
   bathrooms INT,
   amenities TEXT[] NOT NULL DEFAULT '{}',
   images TEXT[] NOT NULL DEFAULT '{}',
-  status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available','taken')),
+  status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available','coming_soon','taken')),
   featured BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()

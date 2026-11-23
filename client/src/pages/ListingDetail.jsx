@@ -24,7 +24,12 @@ export default function ListingDetail() {
   if (!l) return <div className="empty" style={{ marginTop: 28 }}>Loading…</div>;
 
   const label = CATEGORIES.find((c) => c.key === l.category)?.label;
-  const msg = `Hello Asuman Holdings, I'm interested in "${l.title}" (#${l.id}) — ${fmt(l.price, l.currency)} ${unitLabel(l.price_unit)}.`;
+  const msg = l.status === 'taken'
+    ? `Hello Asuman Holdings, I saw that "${l.title}" (#${l.id}) is taken. Please help me find a similar property.`
+    : l.status === 'coming_soon'
+      ? `Hello Asuman Holdings, I'm interested in "${l.title}" (#${l.id}) and would like to know when it will be available.`
+      : `Hello Asuman Holdings, I'm interested in "${l.title}" (#${l.id}) — ${fmt(l.price, l.currency)} ${unitLabel(l.price_unit)}.`;
+  const contactLabel = l.status === 'taken' ? 'Find a similar property' : l.status === 'coming_soon' ? 'Ask about availability' : 'WhatsApp';
 
   return (
     <section className="sec" style={{ paddingTop: 24 }}>
@@ -60,9 +65,11 @@ export default function ListingDetail() {
             {l.original_price && <span className="off" style={{ alignSelf: 'flex-start' }}>Price drop · -{percentOff(l.original_price, l.price)}%</span>}
             <Price l={l} />
             {l.original_price && <p style={{ color: 'var(--ok)', fontWeight: 700 }}>You save {fmt(l.original_price - l.price, l.currency)}</p>}
-            {l.status === 'taken' && <span className="pill bad" style={{ alignSelf: 'flex-start' }}>No longer available</span>}
+            {l.status !== 'available' && <span className={`pill ${l.status === 'taken' ? 'bad' : 'coming-soon-pill'}`} style={{ alignSelf: 'flex-start' }}>
+              {l.status === 'taken' ? 'Taken · no longer available' : 'Coming soon · ask us about availability'}
+            </span>}
             <div className="cta-row">
-              <a className="btn wa" href={waLink(msg)} target="_blank" rel="noreferrer"><MessageCircle className="icon" /> WhatsApp</a>
+              <a className="btn wa" href={waLink(msg)} target="_blank" rel="noreferrer"><MessageCircle className="icon" /> {contactLabel}</a>
               <a className="btn dark" href={`tel:${SITE.phoneTel}`}><Phone className="icon" /> Call</a>
             </div>
           </div>

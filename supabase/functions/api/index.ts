@@ -15,7 +15,7 @@ const supabase = supabaseUrl && serviceKey
 
 const categories = ['land', 'room', 'rental', 'airbnb'];
 const units = ['total', 'month', 'night'];
-const statuses = ['available', 'taken'];
+const statuses = ['available', 'coming_soon', 'taken'];
 const imageTypes: Record<string, { extension: string; matches: (bytes: Uint8Array) => boolean }> = {
   'image/jpeg': { extension: '.jpg', matches: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
   'image/png': { extension: '.png', matches: (b) => [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((n, i) => b[i] === n) },
@@ -234,7 +234,7 @@ async function handle(req: Request) {
 
   const publicListing = /^\/listings\/(\d+)$/.exec(route);
   if (method === 'GET' && publicListing) {
-    const { data, error } = await supabase.from('listings').select('*').eq('id', Number(publicListing[1])).eq('status', 'available').maybeSingle();
+    const { data, error } = await supabase.from('listings').select('*').eq('id', Number(publicListing[1])).maybeSingle();
     if (error) return dbError(req, error);
     return data ? json(req, data) : json(req, { error: 'Listing not found.' }, 404);
   }

@@ -100,7 +100,7 @@ const upload = multer({
 
 const CATEGORIES = ['land', 'room', 'rental', 'airbnb'];
 const UNITS = ['total', 'month', 'night'];
-const STATUSES = ['available', 'taken'];
+const STATUSES = ['available', 'coming_soon', 'taken'];
 
 function clean(body, partial = false) {
   const out = {};
@@ -143,7 +143,7 @@ export const adminRouter = Router();
 // ---------- PUBLIC ----------
 publicRouter.get('/', async (req, res) => {
   const { category, q, min, max, drops, featured } = req.query;
-  const where = ["status = 'available'"];
+  const where = ["status IN ('available', 'coming_soon', 'taken')"];
   const params = [];
   if (CATEGORIES.includes(category)) { params.push(category); where.push(`category = $${params.length}`); }
   if (q !== undefined && typeof q !== 'string') return res.status(400).json({ error: 'Search text must be a single string.' });
@@ -177,7 +177,7 @@ publicRouter.get('/', async (req, res) => {
 });
 
 publicRouter.get('/:id(\\d+)', async (req, res) => {
-  const { rows } = await query("SELECT * FROM listings WHERE id = $1 AND status = 'available'", [req.params.id]);
+  const { rows } = await query('SELECT * FROM listings WHERE id = $1', [req.params.id]);
   if (!rows[0]) return res.status(404).json({ error: 'Listing not found.' });
   res.json(rows[0]);
 });

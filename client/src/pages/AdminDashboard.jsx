@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Plus, Pencil, TrendingDown, Trash2, Eye, EyeOff, LayoutDashboard } from 'lucide-react';
+import { Plus, Pencil, TrendingDown, Trash2, LayoutDashboard } from 'lucide-react';
 import { api, assetUrl, getToken, CATEGORIES, fmt, unitLabel } from '../api.js';
 import ListingForm from '../components/ListingForm.jsx';
 import PriceDropModal from '../components/PriceDropModal.jsx';
@@ -16,6 +16,7 @@ export default function AdminDashboard() {
   const [authed, setAuthed] = useState(!!getToken());
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [statusSaving, setStatusSaving] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -37,11 +38,15 @@ export default function AdminDashboard() {
   const rows = filter ? items.filter((l) => l.category === filter) : items;
   const count = (fn) => items.filter(fn).length;
 
-  async function toggleStatus(l) {
+  async function updateStatus(l, status) {
+    if (l.status === status) return;
+    setStatusSaving(l.id);
     try {
-      await api.admin.update(l.id, { status: l.status === 'available' ? 'taken' : 'available' });
-      load();
+      await api.admin.update(l.id, { status });
+      flash(`${l.title} marked ${status === 'coming_soon' ? 'coming soon' : status}.`);
+      await load();
     } catch (e) { flash(e.message, 'err'); }
+    finally { setStatusSaving(null); }
   }
   async function remove(l) {
     if (!window.confirm(`Delete “${l.title}”? This cannot be undone.`)) return;
@@ -60,6 +65,7 @@ export default function AdminDashboard() {
           <div className="stat gold"><b>{items.length}</b><span>Total listings</span></div>
           <div className="stat dark"><b>{count((l) => l.status === 'available')}</b><span>Available</span></div>
           <div className="stat dark"><b>{count((l) => l.status === 'taken')}</b><span>Taken</span></div>
+          <div className="stat dark"><b>{count((l) => l.status === 'coming_soon')}</b><span>Coming soon</span></div>
           <div className="stat gold"><b>{count((l) => l.original_price)}</b><span>Active price drops</span></div>
         </div>
 
@@ -118,14 +124,25 @@ export default function AdminDashboard() {
                     <strong>{fmt(l.price, l.currency)}</strong> <small>{unitLabel(l.price_unit)}</small>
                     {l.original_price && <><br /><span className="was">{fmt(l.original_price, l.currency)}</span></>}
                   </td>
-                  <td><span className={`pill ${l.status === 'available' ? 'ok' : 'bad'}`}>{l.status}</span></td>
+                  <td>
+                    <label className="sr-only" htmlFor={`availability-${l.id}`}>Availability for {l.title}</label>
+                    <select
+                      id={`availability-${l.id}`}
+                      className={`select availability-select ${l.status === 'available' ? 'availability-available' : l.status === 'coming_soon' ? 'availability-coming-soon' : 'availability-taken'}`}
+                      value={l.status}
+                      disabled={statusSaving === l.id}
+                      onChange={(event) => updateStatus(l, event.target.value)}
+                    >
+                      <option value="available">Available</option>
+                      <option value="coming_soon">Coming soon</option>
+                      <option value="taken">Taken</option>
+                    </select>
+                    {statusSaving === l.id && <span className="sr-only" role="status">Saving availability…</span>}
+                  </td>
                   <td>
                     <div className="row-actions">
                       <button className="btn dark sm" onClick={() => setEditing(l)} aria-label={`Edit ${l.title}`}><Pencil className="icon" /> Edit</button>
                       <button className="btn primary sm" onClick={() => setDropping(l)} aria-label={`Drop price of ${l.title}`}><TrendingDown className="icon" /> Price</button>
-                      <button className="btn ghost sm" onClick={() => toggleStatus(l)} aria-label={l.status === 'available' ? 'Mark as taken' : 'Mark as available'}>
-                        {l.status === 'available' ? <EyeOff className="icon" /> : <Eye className="icon" />}
-                      </button>
                       <button className="btn danger sm" onClick={() => remove(l)} aria-label={`Delete ${l.title}`}><Trash2 className="icon" /></button>
                     </div>
                   </td>

@@ -57,7 +57,7 @@ export default function ListingForm({ listing, onClose, onSaved }) {
               </select></div>
             <div className="field"><label htmlFor="st">Status</label>
               <select id="st" className="select" value={f.status} onChange={set('status')}>
-                <option value="available">Available</option><option value="taken">Taken / unavailable</option>
+                <option value="available">Available</option><option value="coming_soon">Coming soon</option><option value="taken">Taken / unavailable</option>
               </select></div>
             <div className="field full"><label htmlFor="ti">Title</label>
               <input id="ti" className="input" required value={f.title} onChange={set('title')} /></div>

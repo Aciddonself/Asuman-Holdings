@@ -96,6 +96,7 @@ export default function Layout({ children }) {
           <div className="wrap">
             <span>© {new Date().getFullYear()} {SITE.name}. All rights reserved.</span>
             <span>{SITE.tagline}</span>
+            <span>Built by <a href="https://www.zilenix.online" target="_blank" rel="noopener noreferrer">Zilenix</a></span>
           </div>
         </div>
       </footer>

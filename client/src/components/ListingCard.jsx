@@ -29,7 +29,9 @@ export default function ListingCard({ l }) {
         {l.images[0] ? <img src={assetUrl(l.images[0])} alt={l.title} loading="lazy" /> : <CatIcon cat={l.category} />}
         <span className="tag"><CatIcon cat={l.category} /> {label}</span>
         {l.original_price && <span className="tag drop">Price drop</span>}
-        {l.status === 'taken' && <span className="tag taken">Taken</span>}
+        <span className={`tag listing-status ${l.status === 'taken' ? 'taken' : l.status === 'coming_soon' ? 'coming-soon' : 'available'}`}>
+          {l.status === 'taken' ? 'Taken' : l.status === 'coming_soon' ? 'Coming soon' : 'Available'}
+        </span>
       </div>
       <div className="card-body">
         <h3>{l.title}</h3>
